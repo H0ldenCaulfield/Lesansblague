@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Le Sans Blague Co.</title>
+  <meta name="description" content="Le Sans Blague Co. — a private archive of films, treatments, and other quiet experiments. Guests with the house password only.">
   <style>
     body {
       background-color: #e2b947;
@@ -17,6 +18,14 @@
       margin: 0;
       text-align: center;
     }
+    h1 {
+      margin: 0;
+    }
+    .tagline {
+      font-size: 0.85rem;
+      margin-top: 6px;
+      opacity: 0.8;
+    }
     input {
       background: transparent;
       border: none;
@@ -25,25 +34,31 @@
       font-size: 1rem;
       text-align: center;
       outline: none;
-      width: 220px;
-      margin-top: 20px;
+      width: 230px;
+      margin-top: 26px;
     }
     ::placeholder {
       color: #444;
-      opacity: 0.6;
+      opacity: 0.7;
     }
     #response {
       font-style: italic;
-      margin-top: 15px;
+      margin-top: 18px;
       opacity: 0;
       transition: opacity 1s ease-in-out;
+      max-width: 320px;
     }
   </style>
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
+  <p class="tagline">Private archive of films, treatments, and other quiet experiments.</p>
+
   <input type="password" id="pw" placeholder="Enter the house password.">
-  <p id="response">Denied with courtesy. The house prefers silence.</p>
+  <p id="response">
+    Denied with courtesy. The house prefers silence.  
+    The reels, drafts and quiet experiments stay in the dark.
+  </p>
 
   <script>
     const input = document.getElementById('pw');
@@ -51,10 +66,13 @@
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        response.style.opacity = 1; // fade in
-        input.value = ''; // clear the input
+        // show message
+        response.style.opacity = 1;
 
-        // fade out after 5 seconds
+        // clear field for the next attempt
+        input.value = '';
+
+        // fade it away after ~5 seconds
         setTimeout(() => {
           response.style.opacity = 0;
         }, 5000);
