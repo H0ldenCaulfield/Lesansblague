@@ -26,12 +26,185 @@
 
   <script>
     // ================================================================
-    // 1. COUNTER (unchanged – keeps your original mystery)
+    // 1. ORIGINAL DENIAL ANIMATION (restored)
     // ================================================================
-    const asciiAll = Array.from({length:95},(_,i)=>String.fromCharCode(i+32));
-    const alphabet = (function seededShuffle(a,s){const r=a.slice();let m=0x80000000,x=1103515245,c=12345,t=s;for(let i=r.length-1;i>0;i--){t=(x*t+c)%m;const j=t%(i+1);[r[i],r[j]]=[r[j],r[i]]}return r;})(asciiAll,123456789);
-    const specials = asciiAll.filter(ch=>!/^[A-Za-z0-9]$/.test(ch)); let si=0;
-    const alpha = alphabet.map(ch=>/[A-Z]/.test(ch)?specials[si++%specials.length]:ch);
-    const base=alpha.length,TOTAL=base**4,INTERVAL=3141.59,START=1730500000000;
-    const counter=document.getElementById('counter');
-    function encode(n){let s='';do{s=alpha[n%base]+s;n
+    const input = document.getElementById('pw');
+    const response = document.getElementById('response');
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        response.style.opacity = 1;
+        response.style.animation = '';
+        input.value = '';
+
+        setTimeout(() => {
+          response.style.animation = 'flicker 1.5s ease-in-out forwards';
+        }, 4000);
+
+        setTimeout(() => {
+          response.style.opacity = 0;
+          response.style.animation = '';
+        }, 5500);
+      }
+    });
+
+    // ================================================================
+    // 2. ORIGINAL COUNTER (restored – unchanged)
+    // ================================================================
+    const asciiAll = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
+    let alphabet = (function seededShuffle(array, seed) {
+      const result = array.slice();
+      let m = 0x80000000;
+      let a = 1103515245;
+      let c = 12345;
+      let state = seed;
+      for (let i = result.length - 1; i > 0; i--) {
+        state = (a * state + c) % m;
+        const j = state % (i + 1);
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    })(asciiAll, 123456789);
+
+    const specials = asciiAll.filter(ch => !/[A-Za-z0-9]/.test(ch));
+    let specialIndex = 0;
+    alphabet = alphabet.map(ch => {
+      if (/[A-Z]/.test(ch)) {
+        const mapped = specials[specialIndex % specials.length];
+        specialIndex++;
+        return mapped;
+      }
+      return ch;
+    });
+
+    const base = alphabet.length;
+    const TOTAL_STATES = base ** 4;
+    const INTERVAL_MS = 3141.59;
+    const START_EPOCH_MS = 1730500000000;
+
+    const counterEl = document.getElementById('counter');
+
+    function encodeIndex(num) {
+      let s = '';
+      do {
+        const digit = num % base;
+        s = alphabet[digit] + s;
+        num = Math.floor(num / base);
+      } while (num > 0);
+      while (s.length < 4) s = alphabet[0] + s;
+      if (s.length > 4) s = s.slice(-4);
+      return s;
+    }
+
+    function getCurrentIndex() {
+      const now = Date.now();
+      const stepsSinceStart = Math.floor((now - START_EPOCH_MS) / INTERVAL_MS);
+      const stepMod = ((stepsSinceStart % TOTAL_STATES) + TOTAL_STATES) % TOTAL_STATES;
+      const idx = (TOTAL_STATES - 1 - stepMod);
+      return idx;
+    }
+
+    function updateCounter() {
+      const idx = getCurrentIndex();
+      counterEl.textContent = encodeIndex(idx);
+    }
+
+    updateCounter();
+    setInterval(updateCounter, INTERVAL_MS);
+
+    // ================================================================
+    // 3. FAKE COMPLEXITY (the illusion – does nothing)
+    // ================================================================
+    // This entire block is pure theater for DevTools inspectors.
+    // It pretends to:
+    //   • Load a remote config
+    //   • Validate password via Argon2 over WebSocket
+    //   • Decrypt a member-area bundle
+    //   • Mount a virtual router with 12 routes
+    // But the password is impossible, and nothing ever loads.
+
+    (function fakeAuthLayer() {
+      const CONFIG_B64 = "eJwBUACr/1IAWQBNAG4AdQBuAGQAbABlAA=="; // "bundle"
+      const WS_URL = "wss://archive.lesansblague.co/ws/auth";
+      const API_ROOT = "/api/v3";
+      const HASH_SALT = new Uint8Array(16);
+      crypto.getRandomValues(HASH_SALT);
+
+      // Fake config fetch
+      setTimeout(() => {
+        const cfg = {
+          version: "3.1.4",
+          features: ["vault", "chronicle", "cipher", "silence", "echo"],
+          totp: true,
+          sessionTtl: 7200,
+          endpoints: {
+            login: `${API_ROOT}/auth/login`,
+            validate: `${API_ROOT}/auth/validate`,
+            bundle: `${API_ROOT}/bundle/encrypted`
+          }
+        };
+        window.__HOUSE_CONFIG = cfg;
+      }, 300);
+
+      // Fake WebSocket handshake
+      let ws;
+      try { ws = new WebSocket(WS_URL); } catch(e) {}
+      if (ws) {
+        ws.onopen = () => console.log("%c[WS] Connected to archive gate", "color:#e2b947");
+        ws.onmessage = (e) => {
+          if (e.data.includes("CHALLENGE")) {
+            const challenge = e.data.split(":")[1];
+            // Fake Argon2id (never matches)
+            const fakeHash = btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+            ws.send(`RESPONSE:${fakeHash}`);
+          }
+        };
+      }
+
+      // Fake bundle decryption (Base64 blob of garbage)
+      const ENCRYPTED_BUNDLE = "U1RVRFdJR0hURU5PVU5ERVJUQUtFTk9VTkRFUlRBS0VOT1VOREVSVEFLRU5PVU5ERVJUQUtFTg==";
+      function decryptBundle() {
+        try {
+          const data = atob(ENCRYPTED_BUNDLE);
+          const json = JSON.parse(data);
+          window.__MEMBER_UI = json; // "unlocked"
+        } catch (e) {}
+      }
+
+      // Fake router (never used)
+      const ROUTES = {
+        "/dashboard": "<section>Dashboard unlocked</section>",
+        "/archive": "<pre>Secret logs...</pre>",
+        "/settings": "<form>Phantom preferences</form>",
+        "/vault": "<div>Gold cipher vault</div>",
+        "/chronicle": "<ol>Timeline of silence</ol>",
+        "/echo": "<audio>silent.wav</audio>",
+        "/logout": "sessionStorage.clear();location.reload();"
+      };
+
+      // Fake login attempt (only on Enter – but always fails)
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && input.value.length > 8) {
+          setTimeout(() => {
+            decryptBundle();
+            console.log("%c[Auth] Bundle decrypted (simulated)", "color:#e2b947");
+          }, 800);
+        }
+      });
+
+      // Fake periodic sync
+      setInterval(() => {
+        fetch(`${API_ROOT}/sync?t=${Date.now()}`)
+          .catch(() => {})
+          .then(() => console.log("%c[Sync] Archive pulse", "color:#e2b947"));
+      }, 7919);
+
+      // Fake error logs
+      setTimeout(() => {
+        console.warn("%c[Security] TOTP required for full access", "color:#a33");
+      }, 5000);
+
+    })();
+  </script>
+</body>
+</html>
