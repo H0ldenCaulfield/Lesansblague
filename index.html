@@ -49,9 +49,9 @@
     .counter {
       position: absolute;
       bottom: 20px;
-      font-size: 0.8rem;
-      opacity: 0.55;
-      letter-spacing: 0.08em;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      letter-spacing: 0.12em;
       user-select: none;
     }
     @keyframes fadeIn {
@@ -96,24 +96,28 @@ Denied with courtesy. The house prefers silence.
       }
     });
 
-    // Base-95 randomized ASCII counter
-    const counterEl = document.getElementById('counter');
+    // Build printable ASCII characters (32–126)
     const asciiChars = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
-    const shuffled = asciiChars
+    // Filter only special characters (remove letters/numbers)
+    const specials = asciiChars.filter(ch => !/[A-Za-z0-9]/.test(ch));
+    // Randomize order once per page load
+    const shuffled = specials
       .map(ch => ({ ch, r: Math.random() }))
       .sort((a, b) => a.r - b.r)
       .map(obj => obj.ch);
 
-    let n = 0;
     const base = shuffled.length;
+    let n = 0;
+    const counterEl = document.getElementById('counter');
 
+    // Convert number to custom base with fixed 4 digits
     function toCustomBase(num) {
-      if (num === 0) return shuffled[0];
       let s = '';
       while (num > 0) {
         s = shuffled[num % base] + s;
         num = Math.floor(num / base);
       }
+      while (s.length < 4) s = shuffled[0] + s; // pad to 4 digits
       return s;
     }
 
