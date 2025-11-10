@@ -32,15 +32,30 @@
       color: #444;
       opacity: 0.6;
     }
-    p {
+    #response {
       font-style: italic;
       margin-top: 15px;
+      opacity: 0;
+      transition: opacity .6s;
     }
   </style>
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
-  <input type="password" placeholder="Enter password">
-  <p>Denied with courtesy. The house prefers silence.</p>
+  <input type="password" id="pw" placeholder="Enter password">
+  <p id="response">Denied with courtesy. The house prefers silence.</p>
+
+  <script>
+    const input = document.getElementById('pw');
+    const response = document.getElementById('response');
+    response.style.opacity = 0;
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        response.style.opacity = 1;
+        input.value = '';
+      }
+    });
+  </script>
 </body>
 </html>
