@@ -36,16 +36,7 @@
       font-style: italic;
       margin-top: 15px;
       opacity: 0;
-      transition: opacity 1.2s ease-in-out;
-    }
-
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-        opacity: 0;
-      }
-      20%, 22%, 24%, 55% {
-        opacity: 0.4;
-      }
+      transition: opacity 1s ease-in-out;
     }
   </style>
 </head>
@@ -60,18 +51,13 @@
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        response.style.opacity = 1;
-        response.style.animation = ''; // reset
-        input.value = '';
+        response.style.opacity = 1; // fade in
+        input.value = ''; // clear the input
 
-        setTimeout(() => {
-          response.style.animation = 'flicker 1.5s ease-in-out forwards';
-        }, 4000); // flicker starts just before fade-out
-
+        // fade out after 5 seconds
         setTimeout(() => {
           response.style.opacity = 0;
-          response.style.animation = '';
-        }, 5500); // fully gone after 5.5 seconds
+        }, 5000);
       }
     });
   </script>
