@@ -23,13 +23,6 @@
       opacity: 0;
       animation: fadeIn 2s ease-in forwards;
     }
-    .tagline {
-      font-size: 0.9rem;
-      margin-top: 6px;
-      opacity: 0;
-      animation: fadeIn 2s ease-in forwards;
-      animation-delay: 1.8s;
-    }
     input {
       background: transparent;
       border: none;
@@ -54,9 +47,10 @@
       white-space: pre-line;
     }
     .counter {
-      margin-top: 32px;
+      position: absolute;
+      bottom: 20px;
       font-size: 0.8rem;
-      opacity: 0.5;
+      opacity: 0.55;
       letter-spacing: 0.08em;
       user-select: none;
     }
@@ -72,26 +66,23 @@
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
-  <p class="tagline">Authorized silence only.</p>
 
   <input type="password" id="pw" placeholder="Enter the house password.">
   <p id="response">
-Denied with courtesy. The house prefers silence.  
-The reels, drafts and quiet experiments stay in the dark.
+Denied with courtesy. The house prefers silence.
   </p>
 
-  <!-- subtle base-95 counter -->
   <div id="counter" class="counter" aria-hidden="true"></div>
 
   <script>
-    // Password + denial logic
+    // Password denial behavior
     const input = document.getElementById('pw');
     const response = document.getElementById('response');
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         response.style.opacity = 1;
-        response.style.animation = ''; // reset any previous flicker
+        response.style.animation = ''; 
         input.value = '';
 
         setTimeout(() => {
@@ -107,11 +98,7 @@ The reels, drafts and quiet experiments stay in the dark.
 
     // Base-95 randomized ASCII counter
     const counterEl = document.getElementById('counter');
-
-    // Build the 95 printable ASCII characters (32–126)
     const asciiChars = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
-
-    // Shuffle them once per page load
     const shuffled = asciiChars
       .map(ch => ({ ch, r: Math.random() }))
       .sort((a, b) => a.r - b.r)
@@ -134,9 +121,8 @@ The reels, drafts and quiet experiments stay in the dark.
       counterEl.textContent = toCustomBase(n++);
     }
 
-    // Start the pi-timed counter
     updateCounter();
-    setInterval(updateCounter, 3141.59); // 3.14159 seconds
+    setInterval(updateCounter, 3141.59); // every π seconds
   </script>
 </body>
 </html>
