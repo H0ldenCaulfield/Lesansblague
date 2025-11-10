@@ -51,6 +51,14 @@
       opacity: 0;
       transition: opacity 1s ease-in-out;
       max-width: 320px;
+      white-space: pre-line;
+    }
+    .counter {
+      margin-top: 32px;
+      font-size: 0.8rem;
+      opacity: 0.5;
+      letter-spacing: 0.08em;
+      user-select: none;
     }
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -68,17 +76,22 @@
 
   <input type="password" id="pw" placeholder="Enter the house password.">
   <p id="response">
-    Denied with courtesy. The house prefers silence.  
-    The reels, drafts and quiet experiments stay in the dark.
+Denied with courtesy. The house prefers silence.  
+The reels, drafts and quiet experiments stay in the dark.
   </p>
 
+  <!-- subtle base-95 counter -->
+  <div id="counter" class="counter" aria-hidden="true"></div>
+
   <script>
+    // Password + denial logic
     const input = document.getElementById('pw');
     const response = document.getElementById('response');
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
         response.style.opacity = 1;
+        response.style.animation = ''; // reset any previous flicker
         input.value = '';
 
         setTimeout(() => {
@@ -91,6 +104,39 @@
         }, 5500);
       }
     });
+
+    // Base-95 randomized ASCII counter
+    const counterEl = document.getElementById('counter');
+
+    // Build the 95 printable ASCII characters (32–126)
+    const asciiChars = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
+
+    // Shuffle them once per page load
+    const shuffled = asciiChars
+      .map(ch => ({ ch, r: Math.random() }))
+      .sort((a, b) => a.r - b.r)
+      .map(obj => obj.ch);
+
+    let n = 0;
+    const base = shuffled.length;
+
+    function toCustomBase(num) {
+      if (num === 0) return shuffled[0];
+      let s = '';
+      while (num > 0) {
+        s = shuffled[num % base] + s;
+        num = Math.floor(num / base);
+      }
+      return s;
+    }
+
+    function updateCounter() {
+      counterEl.textContent = toCustomBase(n++);
+    }
+
+    // Start the pi-timed counter
+    updateCounter();
+    setInterval(updateCounter, 3141.59); // 3.14159 seconds
   </script>
 </body>
 </html>
