@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Le Sans Blague Co.</title>
-  <meta name="description" content="Le Sans Blague Co. — a private archive of films, treatments, and other quiet experiments. Guests with the house password only.">
+  <title>Le Sans Blague Co. — The House Archives</title>
+  <meta name="description" content="An archive that insists on its own silence.">
   <style>
     body {
       background-color: #e2b947;
@@ -20,11 +20,15 @@
     }
     h1 {
       margin: 0;
+      opacity: 0;
+      animation: fadeIn 2s ease-in forwards;
     }
     .tagline {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       margin-top: 6px;
-      opacity: 0.8;
+      opacity: 0;
+      animation: fadeIn 2s ease-in forwards;
+      animation-delay: 1.8s;
     }
     input {
       background: transparent;
@@ -35,7 +39,7 @@
       text-align: center;
       outline: none;
       width: 230px;
-      margin-top: 26px;
+      margin-top: 28px;
     }
     ::placeholder {
       color: #444;
@@ -48,11 +52,19 @@
       transition: opacity 1s ease-in-out;
       max-width: 320px;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0; }
+      20%, 22%, 24%, 55% { opacity: 0.4; }
+    }
   </style>
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
-  <p class="tagline">Private archive of films, treatments, and other quiet experiments.</p>
+  <p class="tagline">Authorized silence only.</p>
 
   <input type="password" id="pw" placeholder="Enter the house password.">
   <p id="response">
@@ -66,16 +78,17 @@
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        // show message
         response.style.opacity = 1;
-
-        // clear field for the next attempt
         input.value = '';
 
-        // fade it away after ~5 seconds
+        setTimeout(() => {
+          response.style.animation = 'flicker 1.5s ease-in-out forwards';
+        }, 4000);
+
         setTimeout(() => {
           response.style.opacity = 0;
-        }, 5000);
+          response.style.animation = '';
+        }, 5500);
       }
     });
   </script>
