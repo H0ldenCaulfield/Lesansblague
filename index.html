@@ -25,7 +25,7 @@
       font-size: 1rem;
       text-align: center;
       outline: none;
-      width: 200px;
+      width: 220px;
       margin-top: 20px;
     }
     ::placeholder {
@@ -36,24 +36,28 @@
       font-style: italic;
       margin-top: 15px;
       opacity: 0;
-      transition: opacity .6s;
+      transition: opacity 1s ease-in-out;
     }
   </style>
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
-  <input type="password" id="pw" placeholder="Enter password">
+  <input type="password" id="pw" placeholder="Enter the house password.">
   <p id="response">Denied with courtesy. The house prefers silence.</p>
 
   <script>
     const input = document.getElementById('pw');
     const response = document.getElementById('response');
-    response.style.opacity = 0;
 
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        response.style.opacity = 1;
-        input.value = '';
+        response.style.opacity = 1; // fade in
+        input.value = ''; // clear the input
+
+        // fade out after 5 seconds
+        setTimeout(() => {
+          response.style.opacity = 0;
+        }, 5000);
       }
     });
   </script>
