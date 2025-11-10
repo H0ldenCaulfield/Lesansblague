@@ -6,170 +6,32 @@
   <title>Le Sans Blague Co. — The House Archives</title>
   <meta name="description" content="An archive that insists on its own silence.">
   <style>
-    body {
-      background-color: #e2b947;
-      color: #222;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-      position: relative;
-    }
-    h1 {
-      margin: 0;
-      opacity: 0;
-      animation: fadeIn 2s ease-in forwards;
-    }
-    input {
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid #222;
-      color: #222;
-      font-size: 1rem;
-      text-align: center;
-      outline: none;
-      width: 230px;
-      margin-top: 28px;
-    }
-    ::placeholder {
-      color: #444;
-      opacity: 0.7;
-    }
-    #response {
-      font-style: italic;
-      margin-top: 18px;
-      opacity: 0;
-      transition: opacity 1s ease-in-out;
-      max-width: 320px;
-      white-space: pre-line;
-    }
-    .counter {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.9rem;
-      opacity: 0.75;
-      letter-spacing: 0.14em;
-      user-select: none;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0; }
-      20%, 22%, 24%, 55% { opacity: 0.4; }
-    }
+    body{background:#e2b947;color:#222;font-family:'Courier New',monospace;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;margin:0;text-align:center;position:relative}
+    h1{margin:0;opacity:0;animation:fadeIn 2s ease-in forwards}
+    input{background:transparent;border:none;border-bottom:1px solid #222;color:#222;font-size:1rem;text-align:center;outline:none;width:230px;margin-top:28px}
+    ::placeholder{color:#444;opacity:.7}
+    #response{font-style:italic;margin-top:18px;opacity:0;transition:opacity 1s;max-width:320px;white-space:pre-line}
+    .counter{position:absolute;bottom:20px;font-size:.9rem;opacity:.75;letter-spacing:.14em;user-select:none}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes flicker{0%,19%,21%,23%,25%,54%,56%,100%{opacity:0}20%,22%,24%,55%{opacity:.4}}
   </style>
 </head>
 <body>
   <h1>Le Sans Blague Co.</h1>
 
-  <input type="password" id="pw" placeholder="Enter the house password.">
-  <p id="response">
-Denied with courtesy. The house prefers silence.
-  </p>
+  <input type="password" id="pw" placeholder="Enter the house password." autocomplete="off">
+  <p id="response">Denied with courtesy. The house prefers silence.</p>
 
   <div id="counter" class="counter" aria-hidden="true"></div>
 
   <script>
-    // ----- Password denial behavior -----
-    const input = document.getElementById('pw');
-    const response = document.getElementById('response');
-
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        response.style.opacity = 1;
-        response.style.animation = '';
-        input.value = '';
-
-        setTimeout(() => {
-          response.style.animation = 'flicker 1.5s ease-in-out forwards';
-        }, 4000);
-
-        setTimeout(() => {
-          response.style.opacity = 0;
-          response.style.animation = '';
-        }, 5500);
-      }
-    });
-
-    // ----- Base-95 randomized alphabet (stable) -----
-
-    // Deterministic shuffle (seeded) so order is random but DOESN'T change each reload
-    function seededShuffle(array, seed) {
-      const result = array.slice();
-      let m = 0x80000000;        // 2^31
-      let a = 1103515245;
-      let c = 12345;
-      let state = seed;
-      for (let i = result.length - 1; i > 0; i--) {
-        state = (a * state + c) % m;
-        const j = state % (i + 1);
-        [result[i], result[j]] = [result[j], result[i]];
-      }
-      return result;
-    }
-
-    // All 95 printable ASCII characters (32–126)
-    const asciiAll = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
-    let alphabet = seededShuffle(asciiAll, 123456789); // random but stable
-
-    // Replace uppercase letters with special characters for display
-    const specials = asciiAll.filter(ch => !/[A-Za-z0-9]/.test(ch));
-    let specialIndex = 0;
-    alphabet = alphabet.map(ch => {
-      if (/[A-Z]/.test(ch)) {
-        const mapped = specials[specialIndex % specials.length];
-        specialIndex++;
-        return mapped;
-      }
-      return ch;
-    });
-
-    const base = alphabet.length;              // 95
-    const TOTAL_STATES = base ** 4;            // 4-digit space
-    const INTERVAL_MS = 3141.59;               // ~π seconds
-    const START_EPOCH_MS = 1730500000000;      // fixed reference moment
-
-    const counterEl = document.getElementById('counter');
-
-    // Convert a number to 4 "digits" in this base-95 alphabet
-    function encodeIndex(num) {
-      let s = '';
-      do {
-        const digit = num % base;
-        s = alphabet[digit] + s;
-        num = Math.floor(num / base);
-      } while (num > 0);
-
-      // pad / trim to exactly 4 "digits"
-      while (s.length < 4) s = alphabet[0] + s;
-      if (s.length > 4) s = s.slice(-4);
-      return s;
-    }
-
-    // Compute current countdown index based on real time
-    function getCurrentIndex() {
-      const now = Date.now();
-      const stepsSinceStart = Math.floor((now - START_EPOCH_MS) / INTERVAL_MS);
-      // count DOWN within the 4-digit space, wrapping if needed
-      const stepMod = ((stepsSinceStart % TOTAL_STATES) + TOTAL_STATES) % TOTAL_STATES;
-      const idx = (TOTAL_STATES - 1 - stepMod);
-      return idx;
-    }
-
-    function updateCounter() {
-      const idx = getCurrentIndex();
-      counterEl.textContent = encodeIndex(idx);
-    }
-
-    // Initial draw + continuous updates
-    updateCounter();
-    setInterval(updateCounter, INTERVAL_MS);
-  </script>
-</body>
-</html>
+    // ================================================================
+    // 1. COUNTER (unchanged – keeps your original mystery)
+    // ================================================================
+    const asciiAll = Array.from({length:95},(_,i)=>String.fromCharCode(i+32));
+    const alphabet = (function seededShuffle(a,s){const r=a.slice();let m=0x80000000,x=1103515245,c=12345,t=s;for(let i=r.length-1;i>0;i--){t=(x*t+c)%m;const j=t%(i+1);[r[i],r[j]]=[r[j],r[i]]}return r;})(asciiAll,123456789);
+    const specials = asciiAll.filter(ch=>!/^[A-Za-z0-9]$/.test(ch)); let si=0;
+    const alpha = alphabet.map(ch=>/[A-Z]/.test(ch)?specials[si++%specials.length]:ch);
+    const base=alpha.length,TOTAL=base**4,INTERVAL=3141.59,START=1730500000000;
+    const counter=document.getElementById('counter');
+    function encode(n){let s='';do{s=alpha[n%base]+s;n
